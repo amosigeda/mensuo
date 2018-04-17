@@ -9,7 +9,7 @@ import com.bracelet.entity.MemberInfo;
 
 public interface IMemService {
 
-	boolean insert(Long user_id, String tel, String name,String imei);
+	boolean insert(Long user_id, String tel, String name,String imei,String head);
 	@DataSourceChange(slave = true)
 	List<MemberInfo> getMemberInfo(Long user_id, String imei);
 

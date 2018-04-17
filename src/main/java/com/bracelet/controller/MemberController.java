@@ -1,5 +1,6 @@
 package com.bracelet.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bracelet.dto.HttpBaseDto;
 import com.bracelet.entity.BindDevice;
 import com.bracelet.entity.FingerInfo;
@@ -54,7 +56,7 @@ public class MemberController extends BaseController {
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	public HttpBaseDto add(@RequestParam String token,
 			@RequestParam String tel, @RequestParam String name,
-			@RequestParam String imei) {
+			@RequestParam String imei, @RequestParam String head) {
 		logger.info("增加成员=" + token);
 		Long user_id = checkTokenAndUser(token);
 		if (StringUtils.isAllEmpty(tel, imei)) {
@@ -67,8 +69,8 @@ public class MemberController extends BaseController {
 		}
 
 		Map<String, Object> pwd = new HashMap<>();
-		memService.insert(user_id, tel, name, imei);
-	    
+		memService.insert(user_id, tel, name, imei, head);
+
 		member = memService.getMemberInfobyTel(user_id, imei, tel);
 
 		pwd.put("id", member.getId());
@@ -76,17 +78,20 @@ public class MemberController extends BaseController {
 		UserInfo userInfo = userInfoService.getUserInfoByUsername(tel);
 		if (userInfo != null) {
 			userInfoService.updateName(userInfo.getUser_id(), name);
-			
+
 			pwd.put("user_id", userInfo.getUser_id());
 			pwd.put("status", 1);
+			pwd.put("head", head);
 			userInfoService.bindDevice(userInfo.getUser_id(), imei, 0, name);
-			
+
 		} else {
-			if (this.userInfoService.saveUserInfo(tel, "123456", 0,name)) {
+			if (this.userInfoService.saveUserInfo(tel, "123456", 0, name)) {
 				userInfo = userInfoService.getUserInfoByUsername(tel);
-				userInfoService.bindDevice(userInfo.getUser_id(), imei, 0, name);
+				userInfoService
+						.bindDevice(userInfo.getUser_id(), imei, 0, name);
 				pwd.put("user_id", userInfo.getUser_id());
 				pwd.put("status", 0);
+				pwd.put("head", head);
 			}
 		}
 
@@ -105,26 +110,30 @@ public class MemberController extends BaseController {
 		if (pwdInfoList != null) {
 			for (MemberInfo info : pwdInfoList) {
 				Map<String, Object> pwd = new HashMap<>();
+				
 				pwd.put("id", info.getId());
 				pwd.put("name", info.getName());
 				pwd.put("phone", info.getPhone());
 				pwd.put("createtime", info.getCreatetime().getTime());
-				UserInfo userinfo = userInfoService.getUserInfoById(info
-						.getUser_id());
-				if (userinfo != null) {
-					pwd.put("nickname", userinfo.getNickname());
-					pwd.put("head", userinfo.getHead());
+				pwd.put("head", info.getHead());
+				pwd.put("nickname", info.getName());
+				pwd.put("user_id", info.getUser_id());
+				UserInfo userInfo = userInfoService.getUserInfoByUsername(info
+						.getPhone());
+				if (userInfo != null) {
+					pwd.put("user_idd", userInfo.getUser_id());
 				} else {
-					pwd.put("nickname", "");
-					pwd.put("head", "");
+					pwd.put("user_idd", 0);
 				}
 				datalist.add(pwd);
 			}
 		}
 		HttpBaseDto dto = new HttpBaseDto();
-		dto.setData(pwdInfoList);
+		dto.setData(datalist);
 		return dto;
 	}
+
+
 
 	@ResponseBody
 	@RequestMapping(value = "/del", method = RequestMethod.POST)

@@ -307,7 +307,7 @@ public class UserInfoServiceImpl implements IUserInfoService {
 		Timestamp now = Utils.getCurrentTimestamp();
 		int i = jdbcTemplate
 				.update("insert into user_info (username, password, createtime,type,nickname) values (?,?,?,?,?)",
-						new Object[] { tel, password, now, type,name }, new int[] {
+						new Object[] { tel, password, now, type,name}, new int[] {
 								Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP,
 								Types.INTEGER, Types.VARCHAR });
 		return i == 1;

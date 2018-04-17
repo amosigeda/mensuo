@@ -12,6 +12,7 @@ public class MemberInfo {
 	private Timestamp createtime;
 	private Timestamp updatetime;
 	private String name;
+	private String head;
 	
 	public Integer getId() {
 		return id;
@@ -54,5 +55,11 @@ public class MemberInfo {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getHead() {
+		return head;
+	}
+	public void setHead(String head) {
+		this.head = head;
 	}
 }
