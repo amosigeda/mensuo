@@ -15,12 +15,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.bracelet.dto.FingerDto;
 import com.bracelet.dto.SocketBaseDto;
 import com.bracelet.entity.BindDevice;
+import com.bracelet.entity.MemberInfo;
+import com.bracelet.entity.NoticeInfo;
 import com.bracelet.entity.UserInfo;
 import com.bracelet.exception.BizException;
 import com.bracelet.util.PushUtil;
 import com.bracelet.util.RespCode;
 import com.bracelet.util.SmsUtil;
 import com.bracelet.service.IFingerService;
+import com.bracelet.service.IMemService;
 import com.bracelet.service.IOpenDoorService;
 import com.bracelet.service.IPushlogService;
 import com.bracelet.service.ISmslogService;
@@ -44,6 +47,9 @@ public class FingerService implements IService {
 	@Autowired
 	IPushlogService pushlogService;
 
+	@Autowired
+	IMemService memService;
+
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	public SocketBaseDto process(JSONObject jsonObject, Channel channel) {
@@ -53,6 +59,7 @@ public class FingerService implements IService {
 			throw new BizException(RespCode.NOTEXIST_PARAM);
 		}
 		Long userid = jsonObject2.getLong("userid");
+		int isadmin = jsonObject2.getInteger("isadmin");
 
 		String no = jsonObject.getString("no");
 		String imei = jsonObject.getString("imei");
@@ -60,16 +67,22 @@ public class FingerService implements IService {
 		String nickName = "";
 		// Integer register = jsonObject2.getInteger("register");// 0未注册 1注册
 		UserInfo userinfo = userInfoService.getUserInfoById(userid);
+		String openName ="";
 		if (userinfo != null) {
 			name = userinfo.getNickname();
 			nickName = userinfo.getNickname();
+			openName = nickName;
 		}
-
-		opendoorService.insert(2, userid, 4, 2, imei, name);
-
+		
+		if(isadmin == 1){
+			opendoorService.insert(2, userid, 4, 2, imei, openName);
+		}else if(isadmin == 0){
+			MemberInfo member = memService.getMemberInfo(userinfo.getUsername(), imei);
+			opendoorService.insert(2, userid, 4, 2, imei, member.getName());
+		}
+		
 		try {
-			BindDevice binde = userInfoService.getBindInfoByImeiAndStatus(imei,
-					1);
+			BindDevice binde = userInfoService.getBindInfoByImeiAndStatus(imei,1);
 
 			name = binde.getName();
 
@@ -84,12 +97,6 @@ public class FingerService implements IService {
 					if (userinfo != null && userId != userid) {
 						String tel = userinfoo.getUsername();
 
-						String msg = SmsUtil.fingerSosSendMsg(name, nickName,
-								tel);
-
-						smslogService.insert("报警指纹", tel, "SMS_125735073",
-								"imei:" + imei + "-tel:" + tel, 0, msg);
-
 						FingerDto sosDto = new FingerDto();
 						sosDto.setName(name);
 						sosDto.setImei(imei);
@@ -99,13 +106,55 @@ public class FingerService implements IService {
 
 						String title = "指纹报警";
 						String content = JSON.toJSONString(sosDto);
-						String notifyContent = "您绑定的门锁" + name + "被" + nickName
-								+ "使用报警指纹打开,请知悉!";
+						String notifyContent = "您绑定的门锁" + name;
+						if (isadmin == 1) {
+							notifyContent = notifyContent + "被"
+									+ userinfo.getNickname() + "使用报警指纹打开,请知悉!";
+							
 
-						PushUtil.push(target, title, content, notifyContent);
-						// save push log
-						this.pushlogService.insert(userId, imei, 0, target,
-								title, content);
+							String msg = SmsUtil.fingerSosSendMsg(
+									name, userinfo.getNickname(), tel);
+
+							smslogService.insert("报警指纹", tel, "SMS_125735073",
+									"imei:" + imei + "-tel:" + tel, 0, msg);
+
+						} else if (isadmin == 0) {
+							MemberInfo member = memService.getMemberInfo(
+									userinfo.getUsername(), imei);
+							if (member != null) {
+								notifyContent = notifyContent + "被"
+										+ member.getName() + "使用报警指纹打开,请知悉!";
+							
+
+								String msg = SmsUtil.fingerSosSendMsg(
+										name, member.getName(), tel);
+
+								smslogService.insert("报警指纹", tel,
+										"SMS_125735073", "imei:" + imei
+												+ "-tel:" + tel, 0, msg);
+
+							} else {
+								notifyContent = notifyContent + "被手机号为"
+										+ userinfo.getUsername()
+										+ "使用报警指纹打开,请知悉!";
+							
+
+								String msg = SmsUtil.fingerSosSendMsg(
+										name,  userinfo.getUsername() , tel);
+
+								smslogService.insert("报警指纹", tel,
+										"SMS_125735073", "imei:" + imei
+												+ "-tel:" + tel, 0, msg);
+							}
+						}
+
+						// xx 使用报警指纹开锁，请注意！
+						NoticeInfo vinfo = userInfoService.getNoticeSet(userId);
+						if(vinfo == null || vinfo.getMemberunlockswitch() == 1 ){
+							PushUtil.push(target, title, content, notifyContent);
+							// save push log
+							this.pushlogService.insert(userId, imei, 0, target,title, content);
+						}
 
 					}
 				}

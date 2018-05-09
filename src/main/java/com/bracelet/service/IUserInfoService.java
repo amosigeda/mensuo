@@ -4,7 +4,9 @@ import java.util.List;
 
 import com.bracelet.entity.BindDevice;
 import com.bracelet.entity.NotRegisterInfo;
+import com.bracelet.entity.NoticeInfo;
 import com.bracelet.entity.UserInfo;
+import com.bracelet.entity.VersionInfo;
 
 public interface IUserInfoService {
 
@@ -57,5 +59,13 @@ public interface IUserInfoService {
 	boolean updateName(Long id, String name);
 
 	BindDevice getBindInfoByImeiAndUserId(String imei, Long user_id);
+
+	VersionInfo getVersionInfo();
+
+	boolean insertNoticeSet(Long user_id, Integer memberunlockswitch,
+			Integer temporaryunlockswitch, Integer abnormalunlockswitch,
+			Integer appupdateswitch);
+
+	NoticeInfo getNoticeSet(Long user_id);
 
 }

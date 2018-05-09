@@ -21,6 +21,8 @@ public interface IMemService {
 	boolean deleteAll(Long user_id);
 	
 	boolean deleteByImei(String imei);
+	
+	MemberInfo getMemberInfo(String username, String imei);
 
 	
 	

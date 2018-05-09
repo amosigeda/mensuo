@@ -2,7 +2,9 @@ package com.bracelet.service.impl;
 
 import com.bracelet.entity.BindDevice;
 import com.bracelet.entity.NotRegisterInfo;
+import com.bracelet.entity.NoticeInfo;
 import com.bracelet.entity.UserInfo;
+import com.bracelet.entity.VersionInfo;
 import com.bracelet.service.IUserInfoService;
 import com.bracelet.util.Utils;
 
@@ -320,5 +322,46 @@ public class UserInfoServiceImpl implements IUserInfoService {
 				new Object[] { nickname, user_id }, new int[] {
 						Types.VARCHAR, Types.INTEGER });
 		return i == 1;
+	}
+
+	@Override
+	public VersionInfo getVersionInfo() {
+		String sql = "select * from version_info where  1=1 order by id desc LIMIT 1";
+		List<VersionInfo> list = jdbcTemplate.query(sql, new Object[] {
+				
+		}, new BeanPropertyRowMapper<VersionInfo>(
+						VersionInfo.class));
+		if (list != null && !list.isEmpty()) {
+			return list.get(0);
+		} else {
+			logger.info("cannot find userinfo,imei:");
+		}
+		return null;
+	}
+
+	@Override
+	public boolean insertNoticeSet(Long user_id, Integer memberunlockswitch,
+			Integer temporaryunlockswitch, Integer abnormalunlockswitch,
+			Integer appupdateswitch) {
+		Timestamp now = Utils.getCurrentTimestamp();
+		int i = jdbcTemplate
+				.update("insert into notice_set_info (user_id, memberunlockswitch, temporaryunlockswitch, abnormalunlockswitch, appupdateswitch, createtime) values (?,?,?,?,?,?)",
+						new Object[] { user_id, memberunlockswitch ,temporaryunlockswitch, abnormalunlockswitch, appupdateswitch, now }, new int[] {
+								Types.INTEGER, Types.INTEGER,Types.INTEGER, Types.INTEGER,Types.INTEGER, Types.TIMESTAMP });
+		return i == 1;
+	}
+
+	@Override
+	public NoticeInfo getNoticeSet(Long user_id) {
+		String sql = "select * from notice_set_info where  user_id = ? order by id desc  LIMIT 1";
+		List<NoticeInfo> list = jdbcTemplate.query(sql, new Object[] { user_id
+				}, new BeanPropertyRowMapper<NoticeInfo>(
+						NoticeInfo.class));
+		if (list != null && !list.isEmpty()) {
+			return list.get(0);
+		} else {
+			logger.info("cannot find getNoticeSet,imei:" + user_id);
+		}
+		return null;
 	}
 }

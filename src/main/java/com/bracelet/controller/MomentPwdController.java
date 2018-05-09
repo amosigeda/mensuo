@@ -31,7 +31,7 @@ import com.bracelet.util.StringUtil;
  * 临时密码三个接口
  * 添加
  * 删除
- * 查询
+ * 查询          是这个是这个。。
  * */
 
 @Controller

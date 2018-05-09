@@ -32,8 +32,6 @@ public class PushUtil {
 		if (targetValue != null && !"".equals(targetValue)) {
 			pushMessage(targetValue, title, content, 0);
 			pushNotify(targetValue, title, content, notifyContent, 0);
-			pushMessage(targetValue, title, content, 10);
-			pushNotify(targetValue, title, content, notifyContent, 10);
 		}
 
 	}

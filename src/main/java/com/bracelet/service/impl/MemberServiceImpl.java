@@ -94,4 +94,18 @@ public class MemberServiceImpl implements IMemService {
 		return true;
 	}
 
+	@Override
+	public MemberInfo getMemberInfo(String username, String imei) {
+		String sql = "select * from member_info where phone =? and imei =?  LIMIT 1";
+		List<MemberInfo> list = jdbcTemplate.query(sql, new Object[] { username,
+				imei }, new BeanPropertyRowMapper<MemberInfo>(
+				MemberInfo.class));
+		if (list != null && !list.isEmpty()) {
+			return list.get(0);
+		} else {
+			logger.info("get getMemberInfo null.user_id:" + username);
+		}
+		return null;
+	}
+
 }

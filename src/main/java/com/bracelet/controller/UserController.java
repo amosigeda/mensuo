@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.bracelet.dto.HttpBaseDto;
 import com.bracelet.dto.SocketLoginDto;
 import com.bracelet.entity.BindDevice;
+import com.bracelet.entity.NoticeInfo;
 import com.bracelet.entity.UserInfo;
+import com.bracelet.entity.VersionInfo;
 import com.bracelet.exception.BizException;
 import com.bracelet.service.IAuthcodeService;
 import com.bracelet.service.IOpenDoorService;
@@ -61,7 +63,7 @@ public class UserController extends BaseController {
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public HttpBaseDto register(@RequestParam String tel,
 			@RequestParam String code, @RequestParam String pwd) {
-		if (StringUtils.isAnyEmpty(tel, code)) {
+		if (StringUtils.isAnyEmpty(tel, code,pwd)) {
 			throw new BizException(RespCode.NOTEXIST_PARAM);
 		}
 		if (this.authcodeService.verifyAuthCode(tel, code)) {
@@ -490,5 +492,101 @@ public class UserController extends BaseController {
 	}
 		
 	}
+	
+	//版本升级
+	@ResponseBody
+	@RequestMapping(value = "/version/{token}", method = RequestMethod.GET)
+	public HttpBaseDto version(@PathVariable String token) {
+		Long user_id = checkTokenAndUser(token);
+		UserInfo userInfo = userInfoService.getUserInfoById(user_id);
+		if (userInfo == null) {
+			logger.info("askDevice error.no login.token:" + token);
+			throw new BizException(RespCode.U_NOT_EXIST);
+		}
+		VersionInfo vinfo = userInfoService.getVersionInfo();
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		if(vinfo !=null ){
+			map.put("app_download",vinfo.getDownload_path()+"");
+			map.put("app_version",vinfo.getVersion());
+			map.put("createtime",vinfo.getCreatetime());
+			map.put("description",vinfo.getDescription()+"");
+		}else{
+			map.put("app_download", "");
+			map.put("app_version", "");
+			map.put("createtime", "");
+			map.put("description", "");
+		}
+
+		HttpBaseDto dto = new HttpBaseDto();
+		dto.setData(map);
+		return dto;
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/noticeset", method = RequestMethod.POST)
+	public HttpBaseDto noticeset(
+			@RequestParam String token,
+			@RequestParam Integer memberunlockswitch,
+			@RequestParam Integer temporaryunlockswitch,
+			@RequestParam Integer abnormalunlockswitch,
+			@RequestParam Integer appupdateswitch
+			) {
+		logger.info("通知设置接口=");
+		Long user_id = checkTokenAndUser(token);
+		userInfoService.insertNoticeSet(user_id, memberunlockswitch, 
+				temporaryunlockswitch, abnormalunlockswitch, appupdateswitch);
+		
+		HttpBaseDto dto = new HttpBaseDto();
+		return dto;
+	}
+	
+	
+	@ResponseBody
+	@RequestMapping(value = "/noticesett/{token}/{memberunlockswitch}/{temporaryunlockswitch}/{abnormalunlockswitch}/{appupdateswitch}", method = RequestMethod.GET)
+	public HttpBaseDto noticesett(@PathVariable String token,
+			@PathVariable Integer memberunlockswitch,
+			@PathVariable Integer temporaryunlockswitch,
+			@PathVariable Integer abnormalunlockswitch,
+			@PathVariable Integer appupdateswitch
+			) {
+
+		logger.info("通知设置接口=");
+		Long user_id = checkTokenAndUser(token);
+		userInfoService.insertNoticeSet(user_id, memberunlockswitch, 
+				temporaryunlockswitch, abnormalunlockswitch, appupdateswitch);
+		
+		HttpBaseDto dto = new HttpBaseDto();
+		return dto;
+	
+	}
+	
+	
+	@ResponseBody
+	@RequestMapping(value = "/noticeget", method = RequestMethod.POST)
+	public HttpBaseDto noticeget(@RequestParam String token) {
+		logger.info("获取设置设置参数=");
+		Long user_id = checkTokenAndUser(token);
+		NoticeInfo vinfo = userInfoService.getNoticeSet(user_id);
+		Map<String, Object> map = new HashMap<String, Object>();
+		if(vinfo != null){
+			map.put("memberunlockswitch", vinfo.getMemberunlockswitch());
+			map.put("temporaryunlockswitch", vinfo.getTemporaryunlockswitch());
+			map.put("abnormalunlockswitch", vinfo.getAbnormalunlockswitch());
+			map.put("appupdateswitch", vinfo.getAppupdateswitch());
+		}else{
+			map.put("memberunlockswitch", 1);
+			map.put("temporaryunlockswitch", 1);
+			map.put("abnormalunlockswitch", 1);
+			map.put("appupdateswitch", 1);
+		}
+		
+		HttpBaseDto dto = new HttpBaseDto();
+		dto.setData(map);
+		return dto;
+	}
+	
+
+
 
 }

@@ -35,7 +35,7 @@ public class MomentPwdServiceImpl implements IMomentPwdService {
 	@Override
 	@DataSourceChange(slave = true)
 	public List<MomentPwdInfo> getByImei(Long user_id, String imei) {
-		String sql = "select * from moment_pwd_info where user_id=? and imei=? and status=1";
+		String sql = "select * from pwd_moment_info where user_id=? and imei=?";
 		List<MomentPwdInfo> list = jdbcTemplate.query(sql, new Object[] {
 				user_id, imei }, new BeanPropertyRowMapper<MomentPwdInfo>(
 				MomentPwdInfo.class));
@@ -47,7 +47,7 @@ public class MomentPwdServiceImpl implements IMomentPwdService {
 		for (int i = 0; i < 10; i++) {
 			Timestamp now = Utils.getCurrentTimestamp();
 			int b = jdbcTemplate
-					.update("insert into moment_pwd_info (user_id, imei, pwd, createtime, status) values (?,?,?,?,?)",
+					.update("insert into pwd_moment_info (user_id, imei, pwd, createtime, status) values (?,?,?,?,?)",
 							new Object[] { user_id, imei, Utils.rendom6(), now,
 									1 }, new int[] { Types.INTEGER,
 									Types.VARCHAR, Types.INTEGER,
@@ -61,7 +61,7 @@ public class MomentPwdServiceImpl implements IMomentPwdService {
 
 	@Override
 	public boolean updateStatus(Long user_id, String imei,Integer status) {
-		int i = jdbcTemplate.update("update moment_pwd_info set status=? where user_id = ? and imei = ?",
+		int i = jdbcTemplate.update("update pwd_moment_info set status=? where user_id = ? and imei = ?",
 				new Object[] { status, user_id ,imei}, new int[] { Types.INTEGER,Types.INTEGER,Types.VARCHAR });
 		return i == 1;
 	}
@@ -82,7 +82,7 @@ public class MomentPwdServiceImpl implements IMomentPwdService {
 
 	@Override
 	@DataSourceChange(slave = true)
-	public MomentPwdInfo getByImeiAndPwd(String imei, Integer password) {
+	public MomentPwdInfo getByImeiAndPwd(String imei, String password) {
 		String sql = "select * from pwd_moment_info where  imei=? and pwd = ?";
 		List<MomentPwdInfo> list = jdbcTemplate.query(sql, new Object[] {
 				imei, password }, new BeanPropertyRowMapper<MomentPwdInfo>(
@@ -93,6 +93,13 @@ public class MomentPwdServiceImpl implements IMomentPwdService {
 			logger.info("cannot find userinfo,imei:" + imei);
 		}
 		return null;
+	}
+
+	@Override
+	public boolean updateStatusById(Integer id, Integer status) {
+		int i = jdbcTemplate.update("update pwd_moment_info set status=? where id = ? ",
+				new Object[] { status, id}, new int[] { Types.INTEGER , Types.INTEGER  });
+		return i == 1;
 	}
 
 }

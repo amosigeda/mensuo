@@ -15,6 +15,7 @@ import com.bracelet.dto.FingerDto;
 import com.bracelet.dto.SocketBaseDto;
 import com.bracelet.entity.BindDevice;
 import com.bracelet.entity.MomentPwdInfo;
+import com.bracelet.entity.NoticeInfo;
 import com.bracelet.exception.BizException;
 import com.bracelet.service.IMomentPwdService;
 import com.bracelet.service.IOpenDoorService;
@@ -58,12 +59,14 @@ public class MomentPwdService implements IService {
 		String no = jsonObject.getString("no");
 		String imei = jsonObject.getString("imei");
 
-		Integer password = jsonObject2.getInteger("password");
+		String password = jsonObject2.getString("password");
 
-		momentPwdService.updateStatus(imei, password, 1);
+		// momentPwdService.updateStatus(imei, password, 1);
 
 		MomentPwdInfo mmpwdInfo = momentPwdService.getByImeiAndPwd(imei,
 				password);
+
+		momentPwdService.updateStatusById(mmpwdInfo.getId(), 1);
 
 		BindDevice bindd = userInfoService.getBindInfoByImeiAndStatus(imei, 1);
 
@@ -77,13 +80,16 @@ public class MomentPwdService implements IService {
 		String content = JSON.toJSONString(sosDto);
 		String notifyContent = "门锁" + bindd.getName() + "被一次性密码" + password
 				+ "打开,请知悉!";
-		PushUtil.push(target, title, content, notifyContent);
-		// save push log
-		this.pushlogService.insert(mmpwdInfo.getUser_id(), imei, 0, target,
-				title, content);
-		
+		NoticeInfo vinfo = userInfoService.getNoticeSet(mmpwdInfo.getUser_id());
+		if (vinfo == null ||  vinfo.getMemberunlockswitch() == 1) {
+
+			PushUtil.push(target, title, content, notifyContent);
+			// save push log
+			this.pushlogService.insert(mmpwdInfo.getUser_id(), imei, 0, target,
+					title, content);
+		}
 		opendoorService.insert(1, mmpwdInfo.getUser_id(), 5, 2, imei, "");
-		
+
 		SocketBaseDto dto = new SocketBaseDto();
 		dto.setType(jsonObject.getIntValue("type"));
 		dto.setNo(no);

@@ -20,6 +20,8 @@ public interface IMomentPwdService {
 	boolean updateStatus(String imei, Integer password, Integer status);
 	
 	@DataSourceChange(slave = true)
-    MomentPwdInfo getByImeiAndPwd(String imei, Integer password);
+    MomentPwdInfo getByImeiAndPwd(String imei, String password);
+
+	boolean updateStatusById(Integer id, Integer status);
 	
 }

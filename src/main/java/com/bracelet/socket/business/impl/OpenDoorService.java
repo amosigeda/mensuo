@@ -17,12 +17,15 @@ import com.bracelet.dto.OpenDoorDto;
 import com.bracelet.dto.SocketBaseDto;
 import com.bracelet.dto.SocketLoginDto;
 import com.bracelet.entity.BindDevice;
+import com.bracelet.entity.MemberInfo;
 import com.bracelet.entity.NotRegisterInfo;
+import com.bracelet.entity.NoticeInfo;
 import com.bracelet.entity.UserInfo;
 import com.bracelet.exception.BizException;
 import com.bracelet.util.PushUtil;
 import com.bracelet.util.RespCode;
 import com.bracelet.util.SmsUtil;
+import com.bracelet.service.IMemService;
 import com.bracelet.service.IOpenDoorService;
 import com.bracelet.service.IPushlogService;
 import com.bracelet.service.ITokenInfoService;
@@ -43,7 +46,10 @@ public class OpenDoorService implements IService {
 	IVoltageService voltageService;
 	@Autowired
 	ITokenInfoService tokenInfoService;
-	
+
+	@Autowired
+	IMemService memService;
+
 	@Autowired
 	IPushlogService pushlogService;
 
@@ -60,53 +66,89 @@ public class OpenDoorService implements IService {
 		Integer side = jsonObject2.getInteger("side");
 		String no = jsonObject.getString("no");
 		String imei = jsonObject.getString("imei");
+		int isadmin = jsonObject2.getInteger("isadmin");
 
 		Integer voltage = jsonObject2.getInteger("battery_percent");
 
 		voltageService.insertDianLiang(imei, voltage);
 
-		String name = "";
+		// String name = "";
 		Integer register = jsonObject2.getInteger("register");// 0未注册 1注册
 		UserInfo userinfo = userInfoService.getUserInfoById(userid);
-		if (userinfo != null) {
-			name = userinfo.getNickname();
-		}
-		opendoorService.insert(1, userid, way, side, imei, name);
-		
-		BindDevice bind=userInfoService.getBindInfoByImeiAndStatus(imei,1);
-		if(bind!=null){
-			Long user_id=bind.getUser_id();
-			 //开锁方式 0:门把开锁 1:APP开锁,2:指纹开锁,3:密码开锁 
-			String wayString ="门把";
-			if(way==1){
-				wayString ="APP";
-			}else if(way==2){
-				wayString ="指纹";
-			}else if(way==3){
-				wayString ="密码";
+		/*
+		 * if (userinfo != null) { name = userinfo.getNickname(); }
+		 */
+	
+
+		BindDevice bind = userInfoService.getBindInfoByImeiAndStatus(imei, 1);
+		if (bind != null) {
+			Long user_id = bind.getUser_id();
+			// 开锁方式 0:门把开锁 1:APP开锁,2:指纹开锁,3:密码开锁
+			String wayString = "门把";
+			if (way == 1) {
+				wayString = "APP";
+			} else if (way == 2) {
+				wayString = "指纹";
+			} else if (way == 3) {
+				wayString = "密码";
 			}
-			
-			String sideString  = side == 1 ? "门里" : "门外";
-			
-			String notifyContent = "门锁"+bind.getName()+"被名字叫"+name+"的使用"+wayString+"在"+sideString+"打开!";
+
+			String sideString = side == 1 ? "门里" : "门外";
+
+			String notifyContent = "门锁" + bind.getName();
+
+			if (isadmin == 1) {
+				if (userinfo.getNickname() != null
+						&& !"".equals(userinfo.getNickname())) {
+					notifyContent = notifyContent + "被名字叫"
+							+ userinfo.getNickname() + "的使用" + wayString + "在"
+							+ sideString + "打开!";
+					opendoorService.insert(1, userid, way, side, imei,
+							userinfo.getNickname());
+				} else {
+					notifyContent = notifyContent + "被手机号为"
+							+ userinfo.getUsername() + "使用" + wayString + "在"
+							+ sideString + "打开!";
+					opendoorService.insert(1, userid, way, side, imei,
+							userinfo.getUsername());
+				}
+			} else {
+				MemberInfo member = memService.getMemberInfo(
+						userinfo.getUsername(), imei);
+				if (member.getName() != null && !"".equals(member.getName())) {
+					notifyContent = notifyContent + "被名字叫" + member.getName()
+							+ "的使用" + wayString + "在" + sideString + "打开!";
+					opendoorService.insert(1, userid, way, side, imei,
+							member.getName());
+				} else {
+					notifyContent = notifyContent + "被手机号为"
+							+ userinfo.getUsername() + "使用" + wayString + "在"
+							+ sideString + "打开!";
+					opendoorService.insert(1, userid, way, side, imei,
+							userinfo.getUsername());
+				}
+			}
 
 			OpenDoorDto sosDto = new OpenDoorDto();
-			sosDto.setName(name);
+			sosDto.setName(userinfo.getNickname());
 			sosDto.setImei(imei);
 			sosDto.setTimestamp(new Date().getTime());
 			sosDto.setSide(side);
 			sosDto.setWay(way);
 			sosDto.setContent(notifyContent);
-			String target = tokenInfoService
-					.getTokenByUserId(user_id);
+			String target = tokenInfoService.getTokenByUserId(user_id);
 			String title = "开锁";
 			String content = JSON.toJSONString(sosDto);
+			
+			NoticeInfo vinfo = userInfoService.getNoticeSet(user_id);
+			if (vinfo == null ||  vinfo.getMemberunlockswitch() == 1 ) {
 			PushUtil.push(target, title, content, notifyContent);
 			// save push log
-			this.pushlogService.insert(user_id, imei, 0, target,
-					title, content);
+			this.pushlogService
+					.insert(user_id, imei, 0, target, title, content);
+			}
 		}
-		
+
 		SocketBaseDto dto = new SocketBaseDto();
 		dto.setType(jsonObject.getIntValue("type"));
 		dto.setNo(no);

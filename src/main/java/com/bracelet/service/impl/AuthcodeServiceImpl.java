@@ -54,9 +54,9 @@ public class AuthcodeServiceImpl implements IAuthcodeService {
 			return false;
 		}
 		// test
-		if ("0000".equals(code)) {
+	/*	if ("0000".equals(code)) {
 			return true;
-		}
+		}*/
 		String sql = "select * from authcode where tel=? order by createtime desc LIMIT 1";
 		List<Authcode> list = jdbcTemplate.query(sql, new Object[] { tel },
 				new BeanPropertyRowMapper<Authcode>(Authcode.class));

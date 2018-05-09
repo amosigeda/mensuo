@@ -16,6 +16,7 @@ import com.bracelet.dto.FingerDto;
 import com.bracelet.dto.SocketBaseDto;
 import com.bracelet.dto.SocketLoginDto;
 import com.bracelet.entity.BindDevice;
+import com.bracelet.entity.NoticeInfo;
 import com.bracelet.entity.UserInfo;
 import com.bracelet.exception.BizException;
 import com.bracelet.util.PushUtil;
@@ -74,10 +75,13 @@ public class PrizeUpDoorService implements IService {
 								String title = "撬锁报警";
 								String content = JSON.toJSONString(sosDto);
 								String notifyContent = "有人正在撬锁,请及时查看!";
+								
+								NoticeInfo vinfo = userInfoService.getNoticeSet(userId);
+								if (vinfo == null ||  vinfo.getMemberunlockswitch() == 1) {
 								PushUtil.push(target, title, content, notifyContent);
 								// save push log
 								this.pushlogService.insert(userId, imei, 0, target, title, content);
-						
+								}
 						
 					} catch (ApiException e) {
 						e.printStackTrace();
