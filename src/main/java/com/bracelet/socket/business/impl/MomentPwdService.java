@@ -2,6 +2,7 @@ package com.bracelet.socket.business.impl;
 
 import io.netty.channel.Channel;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -58,6 +59,7 @@ public class MomentPwdService implements IService {
 
 		String no = jsonObject.getString("no");
 		String imei = jsonObject.getString("imei");
+		 long timestamp = jsonObject.getLongValue("timestamp");
 
 		String password = jsonObject2.getString("password");
 
@@ -88,7 +90,7 @@ public class MomentPwdService implements IService {
 			this.pushlogService.insert(mmpwdInfo.getUser_id(), imei, 0, target,
 					title, content);
 		}
-		opendoorService.insert(1, mmpwdInfo.getUser_id(), 5, 2, imei, "");
+		opendoorService.insert(1, mmpwdInfo.getUser_id(), 5, 2, imei, "",new Timestamp(timestamp * 1000));
 
 		SocketBaseDto dto = new SocketBaseDto();
 		dto.setType(jsonObject.getIntValue("type"));

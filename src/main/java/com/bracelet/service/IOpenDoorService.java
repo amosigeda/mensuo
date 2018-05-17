@@ -1,5 +1,6 @@
 package com.bracelet.service;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.bracelet.datasource.DataSourceChange;
@@ -14,7 +15,7 @@ public interface IOpenDoorService {
 	List<OpenDoorInfo> getHistory(Long user_id, String imei, String starttime,
 			String endtime);
 
-	boolean insert(Integer type,Long userid, Integer way, Integer side, String imei,String name);
+	boolean insert(Integer type,Long userid, Integer way, Integer side, String imei,String name,Timestamp timestamp);
 
 	Integer getOpenCount(String imei);
 	

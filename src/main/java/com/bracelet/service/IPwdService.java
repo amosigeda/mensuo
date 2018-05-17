@@ -36,6 +36,8 @@ public interface IPwdService {
 
 	boolean deleteAllMomentInfo(Long id);
 
+	boolean deleteByImeiAndMemberId(String imei, Long memberId);
+
 	
 	
 	

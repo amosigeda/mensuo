@@ -95,4 +95,11 @@ public class FingerServiceImpl implements IFingerService {
 		return i == 1;
 	}
 
+	@Override
+	public boolean deleteByImeiAndMemberId(String imei, Long memberId) {
+		int i = jdbcTemplate.update("delete from finger_info where imei = ? and member_id = ?", new Object[] { imei, memberId },
+				new int[] { Types.VARCHAR, Types.INTEGER });
+		return i == 1;
+	}
+
 }

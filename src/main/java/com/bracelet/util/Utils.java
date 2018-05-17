@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 
+import com.taobao.api.ApiException;
+
 public class Utils {
 
 	public final static String accessKeyId = "LTAI8CmVtQhm7KSG";  
@@ -44,6 +46,7 @@ public class Utils {
 	public static final String useFingerprintOpenDoor_SMSTEMPLATE_CODE = "SMS_91985064";// 使用指纹打开短信模板
 	public static final String pickALockSendMsg_SMSTEMPLATE_CODE = "SMS_91990103";// 使用指纹打开短信模板
 	public static final String fingerSosSendMsg_SMSTEMPLATE_CODE = "SMS_125735073";// 使用报警指纹打开短信模板
+	public static final String lowElectricSosMsgSendMsg_SMSTEMPLATE_CODE = "SMS_134515053";// 低电量报警
 
 	public final static String USER_SAVE = "/upload/user/";
 
@@ -417,5 +420,5 @@ public class Utils {
 		String tmp = url + port + path;
 		return tmp;
 	}
-
+	
 }

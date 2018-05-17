@@ -27,6 +27,7 @@ import com.bracelet.entity.PwdInfo;
 import com.bracelet.entity.UserInfo;
 import com.bracelet.entity.WhiteListInfo;
 import com.bracelet.exception.BizException;
+import com.bracelet.service.IFingerService;
 import com.bracelet.service.IMemService;
 import com.bracelet.service.IPwdService;
 import com.bracelet.service.ISosService;
@@ -51,6 +52,10 @@ public class MemberController extends BaseController {
 	IMemService memService;
 	@Autowired
 	IUserInfoService userInfoService;
+	@Autowired
+	IFingerService fingerService;
+	@Autowired
+	IPwdService pwdService;
 
 	@ResponseBody
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
@@ -112,18 +117,22 @@ public class MemberController extends BaseController {
 				Map<String, Object> pwd = new HashMap<>();
 				
 				pwd.put("id", info.getId());
-				pwd.put("name", info.getName());
+				//pwd.put("name", info.getName());
 				pwd.put("phone", info.getPhone());
 				pwd.put("createtime", info.getCreatetime().getTime());
 				pwd.put("head", info.getHead());
-				pwd.put("nickname", info.getName());
+				
 				pwd.put("user_id", info.getUser_id());
 				UserInfo userInfo = userInfoService.getUserInfoByUsername(info
 						.getPhone());
 				if (userInfo != null) {
 					pwd.put("user_idd", userInfo.getUser_id());
+					pwd.put("nickname", userInfo.getNickname());
+					pwd.put("name", userInfo.getNickname());
 				} else {
 					pwd.put("user_idd", 0);
+					pwd.put("nickname", info.getName());
+					pwd.put("name", info.getName());
 				}
 				datalist.add(pwd);
 			}
@@ -137,10 +146,17 @@ public class MemberController extends BaseController {
 
 	@ResponseBody
 	@RequestMapping(value = "/del", method = RequestMethod.POST)
-	public HttpBaseDto del(@RequestParam String token, @RequestParam Long id) {
+	public HttpBaseDto del(@RequestParam String token, @RequestParam Long id, @RequestParam Long  memberId, @RequestParam String imei) {
 		logger.info("删除单个成员=" + token);
 		Long user_id = checkTokenAndUser(token);
+		
 		memService.delete(user_id, id);
+		
+		//UserInfo userinfo =userInfoService.getUserInfoByUsername(phone);
+		
+		fingerService.deleteByImeiAndMemberId(imei,memberId);
+		pwdService.deleteByImeiAndMemberId(imei,memberId);
+	
 		HttpBaseDto dto = new HttpBaseDto();
 		return dto;
 	}

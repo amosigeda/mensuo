@@ -46,11 +46,11 @@ public class OpenDoorServiceImpl implements IOpenDoorService {
 
 	@Override
 	public boolean insert(Integer type, Long userid, Integer way, Integer side,
-			String imei, String name) {
-		Timestamp now = Utils.getCurrentTimestamp();
+			String imei, String name ,Timestamp timestamp) {
+		//Timestamp now = Utils.getCurrentTimestamp();
 		int i = jdbcTemplate
 				.update("insert into open_door_info (type,user_id,imei,way,side,createtime,name) values (?,?,?,?,?,?,?)",
-						new Object[] { type, userid, imei, way, side, now, name },
+						new Object[] { type, userid, imei, way, side, timestamp, name },
 						new int[] { Types.INTEGER, Types.INTEGER,
 								Types.VARCHAR, Types.INTEGER, Types.INTEGER,
 								Types.TIMESTAMP, Types.VARCHAR });

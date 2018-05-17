@@ -2,6 +2,7 @@ package com.bracelet.socket.business.impl;
 
 import io.netty.channel.Channel;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -52,8 +53,8 @@ public class PrizeUpDoorService implements IService {
 		String no = jsonObject.getString("no");
 		String imei = jsonObject.getString("imei");
 		
-
-		opendoorService.insert(3, Long.valueOf(0), 4, 1, imei,"");
+		long timestamp = jsonObject.getLongValue("timestamp");
+		opendoorService.insert(3, Long.valueOf(0), 4, 1, imei,"",new Timestamp(timestamp * 1000));
 
 		List<BindDevice> list = userInfoService.getBindInfoByImei(imei);
 		if (list.size() > 0) {

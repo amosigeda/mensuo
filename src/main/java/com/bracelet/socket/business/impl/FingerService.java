@@ -2,6 +2,7 @@ package com.bracelet.socket.business.impl;
 
 import io.netty.channel.Channel;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -63,6 +64,7 @@ public class FingerService implements IService {
 
 		String no = jsonObject.getString("no");
 		String imei = jsonObject.getString("imei");
+		  long timestamp = jsonObject.getLongValue("timestamp");
 		String name = null;
 		String nickName = "";
 		// Integer register = jsonObject2.getInteger("register");// 0未注册 1注册
@@ -74,12 +76,16 @@ public class FingerService implements IService {
 			openName = nickName;
 		}
 		
-		if(isadmin == 1){
-			opendoorService.insert(2, userid, 4, 2, imei, openName);
-		}else if(isadmin == 0){
+	//	if(isadmin == 1){
+		if(nickName !=null &&!"".equals(nickName)){
+			opendoorService.insert(2, userid, 4, 2, imei, openName,new Timestamp(timestamp * 1000));
+		}else{
+			opendoorService.insert(2, userid, 4, 2, imei, userinfo.getUsername(),new Timestamp(timestamp * 1000));
+		}
+		/*}else if(isadmin == 0){
 			MemberInfo member = memService.getMemberInfo(userinfo.getUsername(), imei);
 			opendoorService.insert(2, userid, 4, 2, imei, member.getName());
-		}
+		}*/
 		
 		try {
 			BindDevice binde = userInfoService.getBindInfoByImeiAndStatus(imei,1);
@@ -107,9 +113,15 @@ public class FingerService implements IService {
 						String title = "指纹报警";
 						String content = JSON.toJSONString(sosDto);
 						String notifyContent = "您绑定的门锁" + name;
-						if (isadmin == 1) {
+					//	if (isadmin == 1) {
+						if(userinfo.getNickname() != null && !"".equals(userinfo.getNickname())){
 							notifyContent = notifyContent + "被"
 									+ userinfo.getNickname() + "使用报警指纹打开,请知悉!";
+						}else{
+							notifyContent = notifyContent + "被手机号为"
+									+ userinfo.getUsername()+ "使用报警指纹打开,请知悉!";
+						}
+						
 							
 
 							String msg = SmsUtil.fingerSosSendMsg(
@@ -118,7 +130,7 @@ public class FingerService implements IService {
 							smslogService.insert("报警指纹", tel, "SMS_125735073",
 									"imei:" + imei + "-tel:" + tel, 0, msg);
 
-						} else if (isadmin == 0) {
+					/*	} else if (isadmin == 0) {
 							MemberInfo member = memService.getMemberInfo(
 									userinfo.getUsername(), imei);
 							if (member != null) {
@@ -146,7 +158,7 @@ public class FingerService implements IService {
 										"SMS_125735073", "imei:" + imei
 												+ "-tel:" + tel, 0, msg);
 							}
-						}
+						}*/
 
 						// xx 使用报警指纹开锁，请注意！
 						NoticeInfo vinfo = userInfoService.getNoticeSet(userId);

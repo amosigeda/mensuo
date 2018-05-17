@@ -22,5 +22,6 @@ public interface IFingerService {
 	List<FingerInfo> getFingerInfobyImei(String imei);
 	
 	boolean update(Long id, Integer type);
+	boolean deleteByImeiAndMemberId(String imei, Long memberId);
 	
 }

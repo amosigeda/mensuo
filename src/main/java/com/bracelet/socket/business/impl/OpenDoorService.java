@@ -2,6 +2,7 @@ package com.bracelet.socket.business.impl;
 
 import io.netty.channel.Channel;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -67,6 +68,8 @@ public class OpenDoorService implements IService {
 		String no = jsonObject.getString("no");
 		String imei = jsonObject.getString("imei");
 		int isadmin = jsonObject2.getInteger("isadmin");
+		
+		  long timestamp = jsonObject.getLongValue("timestamp");
 
 		Integer voltage = jsonObject2.getInteger("battery_percent");
 
@@ -97,22 +100,22 @@ public class OpenDoorService implements IService {
 
 			String notifyContent = "门锁" + bind.getName();
 
-			if (isadmin == 1) {
+		/*	if (isadmin == 1) {*/
 				if (userinfo.getNickname() != null
 						&& !"".equals(userinfo.getNickname())) {
 					notifyContent = notifyContent + "被名字叫"
 							+ userinfo.getNickname() + "的使用" + wayString + "在"
 							+ sideString + "打开!";
 					opendoorService.insert(1, userid, way, side, imei,
-							userinfo.getNickname());
+							userinfo.getNickname(),new Timestamp(timestamp * 1000));
 				} else {
 					notifyContent = notifyContent + "被手机号为"
 							+ userinfo.getUsername() + "使用" + wayString + "在"
 							+ sideString + "打开!";
 					opendoorService.insert(1, userid, way, side, imei,
-							userinfo.getUsername());
+							userinfo.getUsername(),new Timestamp(timestamp * 1000));
 				}
-			} else {
+		/*	} else {
 				MemberInfo member = memService.getMemberInfo(
 						userinfo.getUsername(), imei);
 				if (member.getName() != null && !"".equals(member.getName())) {
@@ -127,7 +130,7 @@ public class OpenDoorService implements IService {
 					opendoorService.insert(1, userid, way, side, imei,
 							userinfo.getUsername());
 				}
-			}
+			}*/
 
 			OpenDoorDto sosDto = new OpenDoorDto();
 			sosDto.setName(userinfo.getNickname());

@@ -172,6 +172,25 @@ public class SmsUtil {
 		AlibabaAliqinFcSmsNumSendResponse rsp = client.execute(req);
 		return rsp.getMsg();
 	}
+	
+	/*
+	低电量报警
+	*/
+	public static String lowElectricSosMsg(String tel,String number,String name) throws ApiException {
+
+		TaobaoClient client = new DefaultTaobaoClient(Utils.URL,
+				Utils.APPKEY, Utils.SECRET);
+		AlibabaAliqinFcSmsNumSendRequest req = new AlibabaAliqinFcSmsNumSendRequest();
+		req.setExtend("");
+		req.setSmsType(Utils.SMS_TYPE);
+		req.setSmsFreeSignName(Utils.SMSFREESIGNNAME);//签名
+		req.setSmsParamString("{number:'"+number+"',name:'"+name+"'}");
+		req.setRecNum(tel);
+		req.setSmsTemplateCode(Utils.lowElectricSosMsgSendMsg_SMSTEMPLATE_CODE);
+		AlibabaAliqinFcSmsNumSendResponse rsp = client.execute(req);
+		return rsp.getMsg();
+	}
+	
 	/*public static void main(String[] args) throws ApiException {
 		String a=useFingerprintOpenDoorSendMsg("123456","tete","18735662247");
 		System.out.println(a);

@@ -28,9 +28,9 @@ public class UserInfoServiceImpl implements IUserInfoService {
 	public boolean insert(String tel) {
 		Timestamp now = Utils.getCurrentTimestamp();
 		int i = jdbcTemplate
-				.update("insert into user_info (username, password, createtime) values (?,?,?)",
-						new Object[] { tel, "123456", now }, new int[] {
-								Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP });
+				.update("insert into user_info (username, password, createtime,nickname) values (?,?,?,?)",
+						new Object[] { tel, "123456", now ,tel}, new int[] {
+								Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP, Types.VARCHAR });
 		return i == 1;
 	}
 
@@ -162,10 +162,10 @@ public class UserInfoServiceImpl implements IUserInfoService {
 	public boolean saveUserInfo(String tel, String password, Integer type) {
 		Timestamp now = Utils.getCurrentTimestamp();
 		int i = jdbcTemplate
-				.update("insert into user_info (username, password, createtime,type) values (?,?,?,?)",
-						new Object[] { tel, password, now, type }, new int[] {
+				.update("insert into user_info (username, password, createtime,type ,nickname) values (?,?,?,?,?)",
+						new Object[] { tel, password, now, type ,tel}, new int[] {
 								Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP,
-								Types.INTEGER });
+								Types.INTEGER, Types.VARCHAR });
 		return i == 1;
 	}
 
