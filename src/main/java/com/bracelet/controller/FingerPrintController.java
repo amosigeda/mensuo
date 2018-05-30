@@ -93,7 +93,8 @@ public class FingerPrintController extends BaseController {
 			@RequestParam Long id) {
 		logger.info("删除指纹=" + token);
 		Long user_id = checkTokenAndUser(token);
-		fingerService.delete(user_id, id);
+		//fingerService.delete(user_id, id);
+		fingerService.delete(id);
 		HttpBaseDto dto = new HttpBaseDto();
 		return dto;
 	}

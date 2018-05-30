@@ -44,15 +44,16 @@ public class PwdController extends BaseController {
 	@ResponseBody
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	public HttpBaseDto setWhiteList(@RequestParam String token,
-			@RequestParam String pwd, @RequestParam String imei,@RequestParam Long pwdId) {
-		logger.info("增加密码=" + token);//不管是用户名还是密码只能有一个
+			@RequestParam String pwd, @RequestParam String imei,
+			@RequestParam Long pwdId) {
+		logger.info("增加密码=" + token);// 不管是用户名还是密码只能有一个
 		Long user_id = checkTokenAndUser(token);
 		if (StringUtils.isAllEmpty(pwd, imei)) {
 			throw new BizException(RespCode.NOTEXIST_PARAM);
 		}
 
-//		PwdInfo pwdInfo = pwdService.getByPhone(user_id, imei,pwdId);
-		PwdInfo pwdInfo = pwdService.getByPhone(imei,pwdId);
+		// PwdInfo pwdInfo = pwdService.getByPhone(user_id, imei,pwdId);
+		PwdInfo pwdInfo = pwdService.getByPhone(imei, pwdId);
 		if (pwdInfo != null) {
 			throw new BizException(RespCode.PWD_EXIST);
 		}
@@ -69,8 +70,8 @@ public class PwdController extends BaseController {
 		Long user_id = checkTokenAndUser(token);
 		HttpBaseDto dto = new HttpBaseDto();
 		List<Map<String, Object>> datalist = new LinkedList<Map<String, Object>>();
-		
-		if (type == 0) {//0是成员
+
+		if (type == 0) {// 0是成员
 			PwdInfo pwdInfo = pwdService.getByPhone(imei, user_id);
 			Map<String, Object> pwd = new HashMap<>();
 			if (pwdInfo != null) {
@@ -79,9 +80,9 @@ public class PwdController extends BaseController {
 				pwd.put("user_id", pwdInfo.getPwd_id());
 				datalist.add(pwd);
 			}
-		//	dto.setData(datalist);
+			// dto.setData(datalist);
 		} else if (type == 1) {
-			
+
 			List<PwdInfo> list = pwdService.getByPhone(imei);
 			if (list != null) {
 				for (PwdInfo info : list) {
@@ -99,13 +100,27 @@ public class PwdController extends BaseController {
 
 	@ResponseBody
 	@RequestMapping(value = "/del", method = RequestMethod.POST)
-	public HttpBaseDto deleteWhiteList(@RequestParam String token,
+	public HttpBaseDto deletePwd(@RequestParam String token,
 			@RequestParam Long id) {
 		logger.info("删除密码=" + token);
 		Long user_id = checkTokenAndUser(token);
-		pwdService.delete(user_id, id);
+		// pwdService.delete(user_id, id);
+		pwdService.deleteById(id);
 		HttpBaseDto dto = new HttpBaseDto();
 		return dto;
+	}
+
+	@ResponseBody
+	@RequestMapping("/deletebyid/{token}/{id}")
+	public HttpBaseDto shanchuMiMa(@PathVariable String token,
+			@PathVariable Long id) {
+
+		logger.info("删除密码GET=" + token);
+		Long user_id = checkTokenAndUser(token);
+		pwdService.deleteById(id);
+		HttpBaseDto dto = new HttpBaseDto();
+		return dto;
+
 	}
 
 	@ResponseBody

@@ -120,7 +120,7 @@ public class MemberController extends BaseController {
 				//pwd.put("name", info.getName());
 				pwd.put("phone", info.getPhone());
 				pwd.put("createtime", info.getCreatetime().getTime());
-				pwd.put("head", info.getHead());
+				
 				
 				pwd.put("user_id", info.getUser_id());
 				UserInfo userInfo = userInfoService.getUserInfoByUsername(info
@@ -129,10 +129,12 @@ public class MemberController extends BaseController {
 					pwd.put("user_idd", userInfo.getUser_id());
 					pwd.put("nickname", userInfo.getNickname());
 					pwd.put("name", userInfo.getNickname());
+					pwd.put("head", userInfo.getHead());
 				} else {
 					pwd.put("user_idd", 0);
 					pwd.put("nickname", info.getName());
 					pwd.put("name", info.getName());
+					pwd.put("head", info.getHead());
 				}
 				datalist.add(pwd);
 			}

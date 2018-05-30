@@ -164,6 +164,15 @@ public class PwdServiceImpl implements IPwdService {
 		return i == 1;
 	}
 
+
+	@Override
+	public boolean deleteById(Long id) {
+		logger.info("通过id删除密码:" + id);
+		int i = jdbcTemplate.update("delete from pwd_info where id = ? ", new Object[] { id },
+				new int[] { Types.INTEGER });
+		return i == 1;
+	}
+
 	
 
 

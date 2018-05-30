@@ -38,6 +38,9 @@ public interface IPwdService {
 
 	boolean deleteByImeiAndMemberId(String imei, Long memberId);
 
+
+	boolean deleteById(Long id);
+
 	
 	
 	

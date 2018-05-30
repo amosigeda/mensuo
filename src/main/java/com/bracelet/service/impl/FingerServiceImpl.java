@@ -102,4 +102,11 @@ public class FingerServiceImpl implements IFingerService {
 		return i == 1;
 	}
 
+	@Override
+	public boolean delete(Long id) {
+		int i = jdbcTemplate.update("delete from finger_info where id = ? ", new Object[] { id },
+				new int[] { Types.INTEGER });
+		return i == 1;
+	}
+
 }

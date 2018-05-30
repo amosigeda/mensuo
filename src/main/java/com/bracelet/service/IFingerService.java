@@ -14,6 +14,7 @@ public interface IFingerService {
 	List<FingerInfo> getFingerInfobyUserId(Long user_id, String imei);
 
 	boolean delete(Long user_id, Long id);
+	boolean delete(Long id);
 	
 	@DataSourceChange(slave = true)
 	List<FingerInfo> getFingerInfoByFingerId(Long fingerId, String imei);
@@ -23,5 +24,6 @@ public interface IFingerService {
 	
 	boolean update(Long id, Integer type);
 	boolean deleteByImeiAndMemberId(String imei, Long memberId);
+
 	
 }
